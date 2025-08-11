@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Healthy Harvest - Organic Superfoods</title>
+    <link rel="stylesheet" href="./styles.css">
+    <style>
+        /* Homepage-specific styles */
+        .hero {
+            background-color: #2e8b57;
+            color: white;
+            padding: 4rem 1rem;
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+        
+        .hero h1 {
+            font-size: 2.8rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .hero p {
+            font-size: 1.3rem;
+            max-width: 800px;
+            margin: 0 auto 2rem;
+            line-height: 1.6;
+        }
+        
+        .products-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+        
+        .section-title {
+            text-align: center;
+            margin-bottom: 2rem;
+            color: #2e8b57;
+            font-size: 2rem;
+        }
+        
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 2rem;
+            margin-bottom: 4rem;
+        }
+        
+        .product-card {
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 3px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+        
+        .product-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .card-image {
+            height: 200px;
+            background-color: #f5f5f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 3.5rem;
+        }
+        
+        .card-content {
+            padding: 1.5rem;
+        }
+        
+        .card-title {
+            font-size: 1.4rem;
+            margin-bottom: 0.5rem;
+            color: #2e8b57;
+        }
+        
+        .card-price {
+            font-weight: bold;
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+            color: #333;
+        }
+        
+        .card-description {
+            color: #555;
+            margin-bottom: 1.5rem;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+        
+        .card-button {
+            display: inline-block;
+            background-color: #2e8b57;
+            color: white;
+            padding: 0.7rem 1.4rem;
+            border-radius: 4px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: background-color 0.3s;
+        }
+        
+        .card-button:hover {
+            background-color: #3cb371;
+        }
+        
+        /* Responsive styles */
+        @media (max-width: 768px) {
+            .hero {
+                padding: 3rem 1rem;
+            }
+            
+            .hero h1 {
+                font-size: 2.2rem;
+            }
+            
+            .hero p {
+                font-size: 1.1rem;
+            }
+            
+            .products-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .section-title {
+                font-size: 1.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+     <nav>
+        <a href="./index.html" class="logo">Healthy Harvest</a>
+        <div class="cart-icon" id="cartIcon">
+            🛒
+            <span class="cart-count" id="cartCount">0</span>
+        </div>
+    </nav>
+    
+    <!-- Hero Section -->
+    <section class="hero">
+        <h1>Premium Organic Superfoods</h1>
+        <p>Nourish your body with our selection of nutrient-rich, organic superfoods. Sustainably sourced and packed with natural goodness to support your health and wellness journey.</p>
+    </section>
+    
+    <!-- Products Section -->
+    <div class="products-container">
+        <h2 class="section-title">Our Products</h2>
+        
+        <div class="products-grid">
+            <!-- Quinoa -->
+            <div class="product-card">
+                <div class="card-image">🌾</div>
+                <div class="card-content">
+                    <h3 class="card-title">Organic Quinoa</h3>
+                    <div class="card-price">R190.00 (2kg)</div>
+                    <p class="card-description">Premium quality organic quinoa packed with protein and essential amino acids. Perfect for gluten-free diets and nutritious meals.</p>
+                    <a href="quinoa.html" class="card-button">View Product</a>
+                </div>
+            </div>
+            
+            <!-- Spelt -->
+            <div class="product-card">
+                <div class="card-image">
+                    <img id="productImage" src="./image/remove.photos-removed-background.png" alt="Organic Spelt Grain/Flour">
+                </div>
+                <div class="card-content">
+                    <h3 class="card-title">Organic Spelt</h3>
+                    <div class="card-price">R190.00 (2kg)</div>
+                    <p class="card-description">Ancient grain spelt available as whole grain or flour. Nutrient-dense and easier to digest than modern wheat.</p>
+                    <a href="spelt.html" class="card-button">View Product</a>
+                </div>
+            </div>
+            
+            <!-- Garbanzo Beans -->
+            <div class="product-card">
+                <div class="card-image">🥜</div>
+                <div class="card-content">
+                    <h3 class="card-title">Garbanzo Beans</h3>
+                    <div class="card-price">R190.00</div>
+                    <p class="card-description">Organic chickpeas packed with plant-based protein and fiber. Perfect for hummus, salads, and stews.</p>
+                    <a href="garbanzo.html" class="card-button">View Product</a>
+                </div>
+            </div>
+            
+            <!-- Soursop Tea -->
+            <div class="product-card">
+                <div class="card-image">🍃</div>
+                <div class="card-content">
+                    <h3 class="card-title">Soursop Teabags</h3>
+                    <div class="card-price">R135.00</div>
+                    <p class="card-description">Premium soursop leaf teabags (graviola) with potential health benefits. Naturally caffeine-free with a unique flavor.</p>
+                    <a href="soursop.html" class="card-button">View Product</a>
+                </div>
+            </div>
+            
+            <!-- Sea Moss 100g -->
+            <div class="product-card">
+                <div class="card-image">🌊</div>
+                <div class="card-content">
+                    <h3 class="card-title">Sea Moss (100g)</h3>
+                    <div class="card-price">R125.00</div>
+                    <p class="card-description">Premium dried organic sea moss rich in minerals. Supports thyroid function, digestion, and skin health.</p>
+                    <a href="seamoss-100.html" class="card-button">View Product</a>
+                </div>
+            </div>
+            
+            <!-- Sea Moss 200g -->
+            <div class="product-card">
+                <div class="card-image">🌊</div>
+                <div class="card-content">
+                    <h3 class="card-title">Sea Moss (200g)</h3>
+                    <div class="card-price">R225.00</div>
+                    <p class="card-description">Double the amount of our popular sea moss at a better value. Perfect for regular users.</p>
+                    <a href="seamoss-200.html" class="card-button">View Product</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Cart Modal -->
+    <div class="overlay" id="overlay"></div>
+    <div class="cart-modal" id="cartModal">
+        <div class="cart-header">
+            <h2>Your Cart</h2>
+            <span class="close-cart" id="closeCart">&times;</span>
+        </div>
+        <div class="cart-items" id="cartItems">
+            <!-- Cart items will be inserted here -->
+        </div>
+        <div class="cart-total" id="cartTotal">
+            Total: R0.00
+        </div>
+    </div>
+    
+    <script src="script.js"></script>
+</body>
+</html>

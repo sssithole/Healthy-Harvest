@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Soursop Teabags - Healthy Harvest</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav>
+        <a href="#" class="logo">Healthy Harvest</a>
+        <div class="cart-icon" id="cartIcon">
+            🛒
+            <span class="cart-count" id="cartCount">0</span>
+        </div>
+    </nav>
+    
+    <!-- Product Page -->
+    <div class="product-page">
+        <div class="product-container">
+            <div class="product-image" id="productImage">🍃</div>
+            <div class="product-details">
+                <h1 class="product-title" id="productTitle">Graviola/Soursop Teabags</h1>
+                <div class="product-price" id="productPrice">R135.00</div>
+                <p class="product-description" id="productDescription">Premium soursop leaf teabags, also known as graviola. Each box contains carefully selected soursop leaves known for their potential health benefits. Naturally caffeine-free with a unique, slightly sweet flavor. Enjoy as a daily wellness tea.</p>
+                <button class="add-to-cart" id="addToCart">Add to Cart</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Cart Modal -->
+    <div class="overlay" id="overlay"></div>
+    <div class="cart-modal" id="cartModal">
+        <div class="cart-header">
+            <h2>Your Cart</h2>
+            <span class="close-cart" id="closeCart">&times;</span>
+        </div>
+        <div class="cart-items" id="cartItems">
+            <!-- Cart items will be inserted here -->
+        </div>
+        <div class="cart-total" id="cartTotal">
+            Total: R0.00
+        </div>
+    </div>
+    
+    <script src="script.js"></script>
+</body>
+</html>

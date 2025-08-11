@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Cart - Healthy Harvest</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        /* Additional styles for cart page */
+        .cart-page {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+        
+        .cart-container {
+            background: white;
+            border-radius: 8px;
+            padding: 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        
+        .cart-header {
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .cart-items {
+            margin-bottom: 2rem;
+        }
+        
+        .cart-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid #f5f5f5;
+        }
+        
+        .cart-summary {
+            border-top: 1px solid #eee;
+            padding-top: 1.5rem;
+        }
+        
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+        }
+        
+        .checkout-btn {
+            display: block;
+            width: 100%;
+            background-color: #2e8b57;
+            color: white;
+            border: none;
+            padding: 1rem;
+            font-size: 1.1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            text-align: center;
+            margin-top: 2rem;
+            text-decoration: none;
+        }
+        
+        .checkout-btn:hover {
+            background-color: #3cb371;
+        }
+        
+        .empty-cart {
+            text-align: center;
+            padding: 2rem;
+        }
+        
+        .continue-shopping {
+            display: inline-block;
+            margin-top: 1rem;
+            color: #2e8b57;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav>
+        <a href="index.html" class="logo">Healthy Harvest</a>
+        <div class="cart-icon" id="cartIcon">
+            🛒
+            <span class="cart-count" id="cartCount">0</span>
+        </div>
+    </nav>
+    
+    <!-- Cart Page Content -->
+    <div class="cart-page">
+        <div class="cart-container">
+            <div class="cart-header">
+                <h1>Your Shopping Cart</h1>
+            </div>
+            
+            <div class="cart-items" id="cartItemsContainer">
+                <!-- Cart items will be inserted here by JavaScript -->
+            </div>
+            
+            <div class="cart-summary" id="cartSummary">
+                <!-- Summary will be inserted here by JavaScript -->
+            </div>
+            
+            <a href="checkout.html" class="checkout-btn" id="checkoutBtn">Proceed to Checkout</a>
+            <a href="index.html" class="continue-shopping">Continue Shopping</a>
+        </div>
+    </div>
+    
+    <script src="script.js"></script>
+    <script>
+        // Additional cart page specific JavaScript
+        document.addEventListener('DOMContentLoaded', function() {
+            renderCartPage();
+            
+            // Update cart count in navbar
+            updateCartCount();
+        });
+        
+        function renderCartPage() {
+            const cartItemsContainer = document.getElementById('cartItemsContainer');
+            const cartSummary = document.getElementById('cartSummary');
+            const checkoutBtn = document.getElementById('checkoutBtn');
+            
+            if (cart.length === 0) {
+                cartItemsContainer.innerHTML = `
+                    <div class="empty-cart">
+                        <p>Your cart is empty</p>
+                        <a href="index.html" class="continue-shopping">Continue Shopping</a>
+                    </div>
+                `;
+                cartSummary.innerHTML = '';
+                checkoutBtn.style.display = 'none';
+                return;
+            }
+            
+            let itemsHTML = '';
+            let subtotal = 0;
+            
+            cart.forEach(item => {
+                const itemTotal = item.quantity * item.price;
+                subtotal += itemTotal;
+                
+                itemsHTML += `
+                    <div class="cart-item">
+                        <div class="item-info">
+                            <h3>${item.title}</h3>
+                            <p>${item.quantity} × R${item.price.toFixed(2)}</p>
+                        </div>
+                        <div class="item-total">
+                            R${itemTotal.toFixed(2)}
+                        </div>
+                    </div>
+                `;
+            });
+            
+            const shipping = 100;
+            const total = subtotal + shipping;
+            
+            cartItemsContainer.innerHTML = itemsHTML;
+            
+            cartSummary.innerHTML = `
+                <div class="summary-row">
+                    <span>Subtotal</span>
+                    <span>R${subtotal.toFixed(2)}</span>
+                </div>
+                <div class="summary-row">
+                    <span>Shipping</span>
+                    <span>R${shipping.toFixed(2)}</span>
+                </div>
+                <div class="summary-row" style="font-weight: bold; font-size: 1.2rem;">
+                    <span>Total</span>
+                    <span>R${total.toFixed(2)}</span>
+                </div>
+            `;
+        }
+    </script>
+</body>
+</html>

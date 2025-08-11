@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Organic Spelt - Healthy Harvest</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .product-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav>
+        <a href="./index.html" class="logo">Healthy Harvest</a>
+        <div class="cart-icon" id="cartIcon">
+            🛒
+            <span class="cart-count" id="cartCount">0</span>
+        </div>
+    </nav>
+    
+    <!-- Product Page -->
+    <div class="product-page">
+        <div class="product-container">
+            <div class="product-image">
+                <img id="productImage" src="./image/remove.photos-removed-background.png" alt="Organic Spelt Grain/Flour">
+            </div>
+            <div class="product-details">
+                <h1 id="productTitle" class="product-title">Organic Spelt Grain/Flour</h1>
+                <div id="productPrice" class="product-price">R190.00</div>
+                <p id="productDescription" class="product-description">
+                    Ancient grain spelt available as whole grain or flour. This 2kg pack contains nutrient-dense spelt that is easier to digest than modern wheat. Rich in protein, fiber, and minerals like manganese and phosphorus. Perfect for baking bread, muffins, or making pasta.
+                </p>
+                <button class="add-to-cart" id="addToCart">Add to Cart</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Cart Modal -->
+    <div class="overlay" id="overlay"></div>
+    <div class="cart-modal" id="cartModal">
+        <div class="cart-header">
+            <h2>Your Cart</h2>
+            <span class="close-cart" id="closeCart">&times;</span>
+        </div>
+        <div class="cart-items" id="cartItems"></div>
+        <div class="cart-total" id="cartTotal">Total: R0.00</div>
+    </div>
+    
+    <script src="script.js"></script>
+</body>
+</html>

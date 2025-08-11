@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sea Moss 100g - Healthy Harvest</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav>
+        <a href="./index.html" class="logo">Healthy Harvest</a>
+        <div class="cart-icon" id="cartIcon">
+            🛒
+            <span class="cart-count" id="cartCount">0</span>
+        </div>
+    </nav>
+    
+    <!-- Product Page -->
+    <div class="product-page">
+        <div class="product-container">
+            <div class="product-image" id="productImage">🌊</div>
+            <div class="product-details">
+                <h1 class="product-title" id="productTitle">Organic Sea Moss (100g)</h1>
+                <div class="product-price" id="productPrice">R125.00</div>
+                <p class="product-description" id="productDescription">Premium dried organic sea moss (Irish moss) in 100g package. This superfood is rich in 92 of the 102 minerals our bodies need. Great for making gels, adding to smoothies, or as a natural thickener. Supports thyroid function, digestion, and skin health.</p>
+                <button class="add-to-cart" id="addToCart">Add to Cart</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Cart Modal -->
+    <div class="overlay" id="overlay"></div>
+    <div class="cart-modal" id="cartModal">
+        <div class="cart-header">
+            <h2>Your Cart</h2>
+            <span class="close-cart" id="closeCart">&times;</span>
+        </div>
+        <div class="cart-items" id="cartItems">
+            <!-- Cart items will be inserted here -->
+        </div>
+        <div class="cart-total" id="cartTotal">
+            Total: R0.00
+        </div>
+    </div>
+    
+    <script src="script.js"></script>
+</body>
+</html>
