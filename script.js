@@ -146,50 +146,50 @@ function updateCartCount() {
 // ===============================
 // Send order to WhatsApp
 // ===============================
-function sendOrderToWhatsApp() {
-    if (cart.length === 0) {
-        alert('Your cart is empty!');
-        return;
-    }
+// function sendOrderToWhatsApp() {
+//     if (cart.length === 0) {
+//         alert('Your cart is empty!');
+//         return;
+//     }
 
-    // Format order details
-    let orderMessage = `*NEW ORDER - Healthy Harvest*\n\n`;
-    let subtotal = 0;
+//     // Format order details
+//     let orderMessage = `*NEW ORDER - Healthy Harvest*\n\n`;
+//     let subtotal = 0;
     
-    cart.forEach(item => {
-        const itemTotal = item.quantity * item.price;
-        subtotal += itemTotal;
-        orderMessage += `➤ ${item.title}\n`;
-        orderMessage += `   Quantity: ${item.quantity}\n`;
-        orderMessage += `   Price: R${item.price.toFixed(2)} each\n`;
-        orderMessage += `   Subtotal: R${itemTotal.toFixed(2)}\n\n`;
-    });
+//     cart.forEach(item => {
+//         const itemTotal = item.quantity * item.price;
+//         subtotal += itemTotal;
+//         orderMessage += `➤ ${item.title}\n`;
+//         orderMessage += `   Quantity: ${item.quantity}\n`;
+//         orderMessage += `   Price: R${item.price.toFixed(2)} each\n`;
+//         orderMessage += `   Subtotal: R${itemTotal.toFixed(2)}\n\n`;
+//     });
 
-    const shipping = 100;
-    const total = subtotal + shipping;
+//     const shipping = 100;
+//     const total = subtotal + shipping;
     
-    orderMessage += `\n*ORDER SUMMARY*\n`;
-    orderMessage += `Subtotal: R${subtotal.toFixed(2)}\n`;
-    orderMessage += `Shipping: R${shipping.toFixed(2)}\n`;
-    orderMessage += `*TOTAL: R${total.toFixed(2)}*\n\n`;
-    orderMessage += `Please confirm this order and provide delivery details.`;
+//     orderMessage += `\n*ORDER SUMMARY*\n`;
+//     orderMessage += `Subtotal: R${subtotal.toFixed(2)}\n`;
+//     orderMessage += `Shipping: R${shipping.toFixed(2)}\n`;
+//     orderMessage += `*TOTAL: R${total.toFixed(2)}*\n\n`;
+//     orderMessage += `Please confirm this order and provide delivery details.`;
 
-    // Encode the message for URL
-    const encodedMessage = encodeURIComponent(orderMessage);
+//     // Encode the message for URL
+//     const encodedMessage = encodeURIComponent(orderMessage);
     
-    // Replace with your WhatsApp number (include country code without + or 0)
-    const whatsappNumber = '27783567678'; // Example: South Africa number
+//     // Replace with your WhatsApp number (include country code without + or 0)
+//     const whatsappNumber = '27783567678'; // Example: South Africa number
     
-    // Create WhatsApp URL
-    const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodedMessage}`;
+//     // Create WhatsApp URL
+//     const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodedMessage}`;
     
-    // Open in new tab
-    window.open(whatsappUrl, '_blank');
+//     // Open in new tab
+//     window.open(whatsappUrl, '_blank');
     
-    // Optional: Clear cart after sending
-    // cart = [];
-    // updateCart();
-}
+//     // Optional: Clear cart after sending
+//     // cart = [];
+//     // updateCart();
+// }
 
 // ===============================
 // Event listeners & page setup

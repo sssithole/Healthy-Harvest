@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Order Successful - Healthy Harvest</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .success-container {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 2rem;
+            text-align: center;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        .success-icon {
+            font-size: 4rem;
+            color: #2e8b57;
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <a href="index.html" class="logo">Healthy Harvest</a>
+        <div class="cart-icon">
+            🛒
+            <span class="cart-count">0</span>
+        </div>
+    </nav>
+
+    <div class="success-container">
+        <div class="success-icon">✓</div>
+        <h1>Payment Successful!</h1>
+        <p>Thank you for your order. We've sent a confirmation to your email.</p>
+        <p>Order ID: <strong id="orderId"></strong></p>
+        <a href="index.html" class="pay-now-btn">Back to Shop</a>
+    </div>
+
+    <script>
+        // Display order ID from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        document.getElementById('orderId').textContent = urlParams.get('m_payment_id') || '';
+
+        // Clear cart
+        localStorage.setItem('cart', JSON.stringify([]));
+    </script>
+</body>
+</html>

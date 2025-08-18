@@ -160,8 +160,8 @@
                 <!-- Summary will be inserted here by JavaScript -->
             </div>
             
-            <!-- <a href="checkout.html" class="checkout-btn" id="checkoutBtn">Proceed to Checkout</a> -->
-            <a href="#" class="checkout-btn" id="checkoutBtn" onclick="sendOrderToWhatsApp()">Proceed to Checkout</a>
+            <a href="checkout.html" class="checkout-btn" id="checkoutBtn">Proceed to Checkout</a>
+            <!-- <a href="#" class="checkout-btn" id="checkoutBtn" onclick="sendOrderToWhatsApp()">Proceed to Checkout</a> -->
             <a href="index.html" class="continue-shopping">Continue Shopping</a>
         </div>
     </div>
@@ -300,7 +300,7 @@
             const whatsappNumber = '27783567678'; // REPLACE WITH YOUR NUMBER +27 
             const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodedMessage}`;
             
-            window.open(whatsappUrl, '_blank');
+            // window.open(whatsappUrl, '_blank');
         }
     </script>
 </body>
