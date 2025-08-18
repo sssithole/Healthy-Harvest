@@ -79,6 +79,59 @@
             color: #2e8b57;
             text-decoration: none;
         }
+        /* Quantity controls */
+        .quantity-controls {
+            display: flex;
+            align-items: center;
+            margin: 0.5rem 0;
+        }
+
+        .quantity-btn {
+            background: #f5f5f5;
+            border: none;
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background 0.2s;
+        }
+
+        .quantity-btn:hover {
+            background: #e0e0e0;
+        }
+
+        .quantity {
+            margin: 0 10px;
+            min-width: 20px;
+            text-align: center;
+        }
+
+        /* Remove button */
+        .remove-btn {
+            background: none;
+            border: none;
+            color: #e74c3c;
+            cursor: pointer;
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+            padding: 0;
+            text-decoration: underline;
+        }
+
+        .remove-btn:hover {
+            color: #c0392b;
+        }
+
+        /* Item actions layout */
+        .item-actions {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+        }
     </style>
 </head>
 <body>
@@ -100,13 +153,15 @@
             
             <div class="cart-items" id="cartItemsContainer">
                 <!-- Cart items will be inserted here by JavaScript -->
+                 
             </div>
             
             <div class="cart-summary" id="cartSummary">
                 <!-- Summary will be inserted here by JavaScript -->
             </div>
             
-            <a href="checkout.html" class="checkout-btn" id="checkoutBtn">Proceed to Checkout</a>
+            <!-- <a href="checkout.html" class="checkout-btn" id="checkoutBtn">Proceed to Checkout</a> -->
+            <a href="#" class="checkout-btn" id="checkoutBtn" onclick="sendOrderToWhatsApp()">Proceed to Checkout</a>
             <a href="index.html" class="continue-shopping">Continue Shopping</a>
         </div>
     </div>
@@ -121,7 +176,7 @@
             updateCartCount();
         });
         
-        function renderCartPage() {
+         function renderCartPage() {
             const cartItemsContainer = document.getElementById('cartItemsContainer');
             const cartSummary = document.getElementById('cartSummary');
             const checkoutBtn = document.getElementById('checkoutBtn');
@@ -134,7 +189,7 @@
                     </div>
                 `;
                 cartSummary.innerHTML = '';
-                checkoutBtn.style.display = 'none';
+                if (checkoutBtn) checkoutBtn.style.display = 'none';
                 return;
             }
             
@@ -146,13 +201,19 @@
                 subtotal += itemTotal;
                 
                 itemsHTML += `
-                    <div class="cart-item">
+                    <div class="cart-item" data-product-id="${item.id}">
                         <div class="item-info">
                             <h3>${item.title}</h3>
-                            <p>${item.quantity} × R${item.price.toFixed(2)}</p>
+                            <div class="quantity-controls">
+                                <button class="quantity-btn minus" data-action="remove">−</button>
+                                <span class="quantity">${item.quantity}</span>
+                                <button class="quantity-btn plus" data-action="add">+</button>
+                            </div>
+                            <p>R${item.price.toFixed(2)} each</p>
                         </div>
-                        <div class="item-total">
-                            R${itemTotal.toFixed(2)}
+                        <div class="item-actions">
+                            <div class="item-total">R${itemTotal.toFixed(2)}</div>
+                            <button class="remove-btn">Remove</button>
                         </div>
                     </div>
                 `;
@@ -162,6 +223,29 @@
             const total = subtotal + shipping;
             
             cartItemsContainer.innerHTML = itemsHTML;
+            
+            // Add event listeners
+            document.querySelectorAll('.quantity-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const productId = this.closest('.cart-item').dataset.productId;
+                    if (this.dataset.action === 'add') {
+                        addToCart(productId);
+                    } else {
+                        removeFromCart(productId);
+                    }
+                });
+            });
+            
+            document.querySelectorAll('.remove-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const productId = this.closest('.cart-item').dataset.productId;
+                    const itemIndex = cart.findIndex(item => item.id === productId);
+                    if (itemIndex !== -1) {
+                        cart.splice(itemIndex, 1);
+                        updateCart();
+                    }
+                });
+            });
             
             cartSummary.innerHTML = `
                 <div class="summary-row">
@@ -177,6 +261,46 @@
                     <span>R${total.toFixed(2)}</span>
                 </div>
             `;
+            
+            // Setup WhatsApp checkout
+            if (checkoutBtn) {
+                checkoutBtn.onclick = sendOrderToWhatsApp;
+                checkoutBtn.style.display = 'block';
+            }
+        }
+        
+        function sendOrderToWhatsApp() {
+            if (cart.length === 0) {
+                alert('Your cart is empty!');
+                return;
+            }
+
+            let orderMessage = `*NEW ORDER - Healthy Harvest*\n\n`;
+            let subtotal = 0;
+            
+            cart.forEach(item => {
+                const itemTotal = item.quantity * item.price;
+                subtotal += itemTotal;
+                orderMessage += `➤ ${item.title}\n`;
+                orderMessage += `   Quantity: ${item.quantity}\n`;
+                orderMessage += `   Price: R${item.price.toFixed(2)} each\n`;
+                orderMessage += `   Subtotal: R${itemTotal.toFixed(2)}\n\n`;
+            });
+
+            const shipping = 100;
+            const total = subtotal + shipping;
+            
+            orderMessage += `\n*ORDER SUMMARY*\n`;
+            orderMessage += `Subtotal: R${subtotal.toFixed(2)}\n`;
+            orderMessage += `Shipping: R${shipping.toFixed(2)}\n`;
+            orderMessage += `*TOTAL: R${total.toFixed(2)}*\n\n`;
+            orderMessage += `Please confirm this order and provide delivery details.`;
+
+            const encodedMessage = encodeURIComponent(orderMessage);
+            const whatsappNumber = '27783567678'; // REPLACE WITH YOUR NUMBER +27 
+            const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodedMessage}`;
+            
+            window.open(whatsappUrl, '_blank');
         }
     </script>
 </body>

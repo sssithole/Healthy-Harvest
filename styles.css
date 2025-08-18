@@ -199,6 +199,60 @@ nav {
     z-index: 999;
 }
 
+/* Quantity controls */
+.quantity-controls {
+    display: flex;
+    align-items: center;
+    margin: 0.5rem 0;
+}
+
+.quantity-btn {
+    background: #f5f5f5;
+    border: none;
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background 0.2s;
+}
+
+.quantity-btn:hover {
+    background: #e0e0e0;
+}
+
+.quantity {
+    margin: 0 10px;
+    min-width: 20px;
+    text-align: center;
+}
+
+/* Remove button */
+.remove-btn {
+    background: none;
+    border: none;
+    color: #e74c3c;
+    cursor: pointer;
+    font-size: 0.9rem;
+    margin-top: 0.5rem;
+    padding: 0;
+    text-decoration: underline;
+}
+
+.remove-btn:hover {
+    color: #c0392b;
+}
+
+/* Item actions layout */
+.item-actions {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
     .product-container {

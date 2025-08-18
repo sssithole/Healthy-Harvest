@@ -2,23 +2,41 @@
 // Product data
 // ===============================
 const products = {
+  seamoss100: {
+        title: "Organic Sea Moss (100g)",
+        price: 125,
+        description: "Premium dried organic sea moss (Irish moss) in 100g package. This superfood is rich in 92 of the 102 minerals our bodies need. Great for making gels, adding to smoothies, or as a natural thickener. Supports thyroid function, digestion, and skin health.",
+        image: "./image/sea moss.png"
+    },
+    seamoss200: {
+        title: "Organic Sea Moss (200g)",
+        price: 225,
+        description: "Double the amount of our popular sea moss at a better value. Perfect for regular users.",
+        image: "./image/sea moss.png"
+    },
     quinoa: {
-        title: 'Organic Quinoa',
+        title: "Organic Quinoa (2kg)",
         price: 190,
-        description: 'Premium quality organic quinoa, packed with protein and essential amino acids...',
-        image: './image/remove.photos-removed-background.png'
+        description: "Premium quality organic quinoa, packed with protein and essential amino acids. Perfect for healthy meals.",
+        image: "./image/quinoa.png"
     },
     spelt: {
-        title: 'Organic Spelt Grain/Flour',
+        title: "Organic Spelt Grain/Flour (2kg)",
         price: 190,
-        description: 'Ancient grain spelt available as whole grain or flour. This 2kg pack contains nutrient-dense spelt...',
-        image: './image/remove.photos-removed-background.png'
+        description: "Ancient grain spelt available as whole grain or flour. Nutrient-dense and easy to digest.",
+        image: "./image/remove.photos-removed-background.png"
     },
     garbanzo: {
-        title: 'Organic Garbanzo Beans (Chickpeas)',
+        title: "Organic Garbanzo Beans (2kg)",
         price: 190,
-        description: 'High-quality organic garbanzo beans...',
-        image: './image/remove.photos-removed-background.png'
+        description: "High-quality organic garbanzo beans (chickpeas), perfect for hummus, salads, and stews.",
+        image: "./image/pishon.png"
+    },
+    teabags: {
+        title: "Organic Herbal Tea Bags (20 pack)",
+        price: 85,
+        description: "Natural herbal tea bags for daily relaxation and wellness.",
+        image: "./image/TeaBags.png"
     }
 };
 
@@ -76,13 +94,43 @@ function addToCart(productId) {
         });
     }
 
-    updateCartCount();
-    localStorage.setItem('cart', JSON.stringify(cart));
+    updateCart();
 
     const addToCartBtn = document.getElementById('addToCart');
     if (addToCartBtn) {
         addToCartBtn.textContent = 'Added to Cart!';
         setTimeout(() => addToCartBtn.textContent = 'Add to Cart', 1500);
+    }
+}
+
+// ===============================
+// Remove item from cart
+// ===============================
+function removeFromCart(productId) {
+    const itemIndex = cart.findIndex(item => item.id === productId);
+    if (itemIndex === -1) return;
+    
+    if (cart[itemIndex].quantity > 1) {
+        // If more than 1 quantity, just decrease by 1
+        cart[itemIndex].quantity -= 1;
+    } else {
+        // If only 1 quantity, remove the item completely
+        cart.splice(itemIndex, 1);
+    }
+    
+    updateCart();
+}
+
+// ===============================
+// Update cart in storage and UI
+// ===============================
+function updateCart() {
+    localStorage.setItem('cart', JSON.stringify(cart));
+    updateCartCount();
+    
+    // Refresh cart display if on cart page
+    if (window.location.pathname.includes('cart.html')) {
+        renderCartPage();
     }
 }
 
@@ -94,6 +142,53 @@ function updateCartCount() {
     if (!cartCount) return;
     const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
     cartCount.textContent = totalItems;
+}
+// ===============================
+// Send order to WhatsApp
+// ===============================
+function sendOrderToWhatsApp() {
+    if (cart.length === 0) {
+        alert('Your cart is empty!');
+        return;
+    }
+
+    // Format order details
+    let orderMessage = `*NEW ORDER - Healthy Harvest*\n\n`;
+    let subtotal = 0;
+    
+    cart.forEach(item => {
+        const itemTotal = item.quantity * item.price;
+        subtotal += itemTotal;
+        orderMessage += `➤ ${item.title}\n`;
+        orderMessage += `   Quantity: ${item.quantity}\n`;
+        orderMessage += `   Price: R${item.price.toFixed(2)} each\n`;
+        orderMessage += `   Subtotal: R${itemTotal.toFixed(2)}\n\n`;
+    });
+
+    const shipping = 100;
+    const total = subtotal + shipping;
+    
+    orderMessage += `\n*ORDER SUMMARY*\n`;
+    orderMessage += `Subtotal: R${subtotal.toFixed(2)}\n`;
+    orderMessage += `Shipping: R${shipping.toFixed(2)}\n`;
+    orderMessage += `*TOTAL: R${total.toFixed(2)}*\n\n`;
+    orderMessage += `Please confirm this order and provide delivery details.`;
+
+    // Encode the message for URL
+    const encodedMessage = encodeURIComponent(orderMessage);
+    
+    // Replace with your WhatsApp number (include country code without + or 0)
+    const whatsappNumber = '27783567678'; // Example: South Africa number
+    
+    // Create WhatsApp URL
+    const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodedMessage}`;
+    
+    // Open in new tab
+    window.open(whatsappUrl, '_blank');
+    
+    // Optional: Clear cart after sending
+    // cart = [];
+    // updateCart();
 }
 
 // ===============================
