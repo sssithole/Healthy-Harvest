@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Checkout - Healthy Harvest</title>
+    <title>Checkout - Pishon</title>
     <link rel="stylesheet" href="styles.css">
     <style>
         /* Checkout Page Specific Styles */
@@ -78,6 +78,37 @@
             margin-top: 2rem;
         }
 
+        .banking-details {
+            background: #f0f8ff;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin: 2rem 0;
+            border-left: 4px solid #2e8b57;
+        }
+
+        .banking-details h3 {
+            margin-top: 0;
+            color: #2e8b57;
+        }
+
+        .reference-number {
+            background: #fff8e1;
+            padding: 1rem;
+            border-radius: 4px;
+            margin: 1rem 0;
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        .whatsapp-info {
+            background: #e8f5e9;
+            padding: 1rem;
+            border-radius: 4px;
+            margin: 1rem 0;
+            text-align: center;
+        }
+
         @media (max-width: 600px) {
             .form-row {
                 flex-direction: column;
@@ -89,7 +120,7 @@
 <body>
     <!-- Navigation -->
     <nav>
-        <a href="index.html" class="logo">Healthy Harvest</a>
+        <a href="index.html" class="logo">Pishon</a>
         <div class="cart-icon">
             🛒
             <span class="cart-count" id="cartCount">0</span>
@@ -100,7 +131,7 @@
     <div class="checkout-container">
         <h1>Checkout</h1>
         
-        <form id="checkoutForm" action="https://www.payfast.co.za/eng/process" method="post">
+        <form id="checkoutForm">
             <!-- Customer Information -->
             <div class="form-section">
                 <h2>Customer Information</h2>
@@ -163,32 +194,35 @@
                 </div>
             </div>
 
-            <!-- PayFast Hidden Fields -->
-            <input type="hidden" name="merchant_id" value="YOUR_MERCHANT_ID">
-            <input type="hidden" name="merchant_key" value="YOUR_MERCHANT_KEY">
-            <input type="hidden" name="return_url" value="https://yourdomain.com/success.html">
-            <input type="hidden" name="cancel_url" value="https://yourdomain.com/cart.html">
-            <input type="hidden" name="notify_url" value="https://yourdomain.com/notify.php">
-            <input type="hidden" name="m_payment_id" id="m_payment_id">
-            <input type="hidden" name="amount" id="payfast_amount">
-            <input type="hidden" name="item_name" value="Healthy Harvest Order">
-
-            <!-- Payment Method -->
-            <div class="form-section">
-                <h2>Payment Method</h2>
-                <p>You'll enter your payment details on the secure PayFast page</p>
+            <!-- Banking Details Section -->
+            <div class="banking-details" id="bankingDetails" style="display: none;">
+                <h3>Banking Details</h3>
+                <p>Please deposit the total amount to the following account:</p>
+                <div class="reference-number" id="referenceNumber">
+                    <!-- Reference number will be populated by JavaScript -->
+                </div>
+                <p><strong>Bank:</strong> TymBank</p>
+                <p><strong>Account Number:</strong> 0000 00019900</p>
+                <p><strong>Reference:</strong> <span id="referenceText"></span></p>
+                <p><strong>Amount:</strong> <span id="depositAmount"></span></p>
+                
+                <div class="whatsapp-info">
+                    <p>We've sent your order details to WhatsApp. Please check your messages.</p>
+                    <p>If you didn't receive the message, please click the button below:</p>
+                    <button type="button" id="whatsappBtn" class="pay-now-btn" style="background-color: #25D366;">
+                        Send Order via WhatsApp
+                    </button>
+                </div>
             </div>
 
-            <button type="submit" class="pay-now-btn">Proceed to Payment</button>
+            <button type="submit" class="pay-now-btn" id="submitBtn">Complete Order</button>
         </form>
     </div>
 
-    <script src="script.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             // Generate order ID
             const orderId = 'ORD-' + Date.now();
-            document.getElementById('m_payment_id').value = orderId;
             
             // Load cart items from localStorage
             const cart = JSON.parse(localStorage.getItem('cart')) || [];
@@ -206,21 +240,6 @@
                         <span>R${itemTotal.toFixed(2)}</span>
                     </div>
                 `;
-                
-                // Add hidden fields for PayFast itemization
-                const form = document.getElementById('checkoutForm');
-                const addHiddenField = (name, value) => {
-                    const input = document.createElement('input');
-                    input.type = 'hidden';
-                    input.name = name;
-                    input.value = value;
-                    form.appendChild(input);
-                };
-                
-                addHiddenField(`item_name_${index + 1}`, item.title);
-                addHiddenField(`item_description_${index + 1}`, `Quantity: ${item.quantity}`);
-                addHiddenField(`amount_${index + 1}`, item.price.toFixed(2));
-                addHiddenField(`quantity_${index + 1}`, item.quantity);
             });
             
             // Calculate totals
@@ -229,11 +248,71 @@
             
             document.getElementById('subtotal').textContent = `R${subtotal.toFixed(2)}`;
             document.getElementById('total').textContent = `R${total.toFixed(2)}`;
-            document.getElementById('payfast_amount').value = total.toFixed(2);
             
             // Update cart count
             const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
             document.getElementById('cartCount').textContent = totalItems;
+
+            // Handle form submission
+            document.getElementById('checkoutForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                // Get form data
+                const firstName = document.getElementById('name_first').value;
+                const lastName = document.getElementById('name_last').value;
+                const email = document.getElementById('email_address').value;
+                const phone = document.getElementById('cell_number').value;
+                const address = document.getElementById('address').value;
+                const city = document.getElementById('city').value;
+                const postalCode = document.getElementById('postal_code').value;
+                
+                // Generate reference number from phone number
+                const reference = 'REF-' + phone.replace(/\D/g, '').slice(-9);
+                
+                // Show banking details
+                document.getElementById('bankingDetails').style.display = 'block';
+                document.getElementById('referenceNumber').textContent = 'Your Reference: ' + reference;
+                document.getElementById('referenceText').textContent = reference;
+                document.getElementById('depositAmount').textContent = 'R' + total.toFixed(2);
+                
+                // Hide submit button
+                document.getElementById('submitBtn').style.display = 'none';
+                
+                // Prepare order details for WhatsApp
+                let orderDetails = `New Order - ${orderId}\n\n`;
+                orderDetails += `Customer: ${firstName} ${lastName}\n`;
+                orderDetails += `Email: ${email}\n`;
+                orderDetails += `Phone: ${phone}\n\n`;
+                orderDetails += `Shipping Address:\n${address}\n${city} ${postalCode}\n\n`;
+                orderDetails += `Order Items:\n`;
+                
+                cart.forEach(item => {
+                    orderDetails += `${item.title} × ${item.quantity} - R${(item.price * item.quantity).toFixed(2)}\n`;
+                });
+                
+                orderDetails += `\nSubtotal: R${subtotal.toFixed(2)}\n`;
+                orderDetails += `Shipping: R${shipping.toFixed(2)}\n`;
+                orderDetails += `Total: R${total.toFixed(2)}\n\n`;
+                orderDetails += `Reference: ${reference}`;
+                
+                // Encode the message for WhatsApp URL
+                const encodedMessage = encodeURIComponent(orderDetails);
+                const whatsappUrl = `https://wa.me/27733311291?text=${encodedMessage}`;
+                
+                // Set up WhatsApp button
+                document.getElementById('whatsappBtn').addEventListener('click', function() {
+                    window.open(whatsappUrl, '_blank');
+                });
+                
+                // Automatically open WhatsApp after a short delay
+                setTimeout(() => {
+                    window.open(whatsappUrl, '_blank');
+                }, 1000);
+                
+                // Clear cart after order
+                localStorage.removeItem('cart');
+                document.getElementById('cartCount').textContent = '0';
+            });
         });
     </script>
 </body>
