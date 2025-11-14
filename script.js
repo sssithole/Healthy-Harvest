@@ -143,53 +143,93 @@ function updateCartCount() {
     const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
     cartCount.textContent = totalItems;
 }
+
 // ===============================
-// Send order to WhatsApp
+// Mobile Zoom Functionality
 // ===============================
-// function sendOrderToWhatsApp() {
-//     if (cart.length === 0) {
-//         alert('Your cart is empty!');
-//         return;
-//     }
-
-//     // Format order details
-//     let orderMessage = `*NEW ORDER - Healthy Harvest*\n\n`;
-//     let subtotal = 0;
+function initializeMobileZoom() {
+    const productImage = document.querySelector('.product-image');
+    if (!productImage) return;
     
-//     cart.forEach(item => {
-//         const itemTotal = item.quantity * item.price;
-//         subtotal += itemTotal;
-//         orderMessage += `➤ ${item.title}\n`;
-//         orderMessage += `   Quantity: ${item.quantity}\n`;
-//         orderMessage += `   Price: R${item.price.toFixed(2)} each\n`;
-//         orderMessage += `   Subtotal: R${itemTotal.toFixed(2)}\n\n`;
-//     });
-
-//     const shipping = 100;
-//     const total = subtotal + shipping;
+    const img = productImage.querySelector('img');
+    if (!img) return;
     
-//     orderMessage += `\n*ORDER SUMMARY*\n`;
-//     orderMessage += `Subtotal: R${subtotal.toFixed(2)}\n`;
-//     orderMessage += `Shipping: R${shipping.toFixed(2)}\n`;
-//     orderMessage += `*TOTAL: R${total.toFixed(2)}*\n\n`;
-//     orderMessage += `Please confirm this order and provide delivery details.`;
-
-//     // Encode the message for URL
-//     const encodedMessage = encodeURIComponent(orderMessage);
+    let isZoomed = false;
+    let isDragging = false;
+    let startX, startY, translateX = 0, translateY = 0;
     
-//     // Replace with your WhatsApp number (include country code without + or 0)
-//     const whatsappNumber = '27783567678'; // Example: South Africa number
+    // Click to zoom (mobile friendly)
+    productImage.addEventListener('click', function(e) {
+        if (window.innerWidth <= 768) { // Mobile only
+            if (!isZoomed) {
+                // Zoom in
+                productImage.classList.add('zoomed');
+                isZoomed = true;
+                img.style.transform = 'scale(1.8)';
+                document.body.style.overflow = 'hidden';
+            } else {
+                // Zoom out
+                resetZoom();
+            }
+        }
+    });
     
-//     // Create WhatsApp URL
-//     const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodedMessage}`;
+    // Touch events for panning
+    productImage.addEventListener('touchstart', function(e) {
+        if (isZoomed && e.touches.length === 1) {
+            isDragging = true;
+            startX = e.touches[0].clientX - translateX;
+            startY = e.touches[0].clientY - translateY;
+        }
+    });
     
-//     // Open in new tab
-//     window.open(whatsappUrl, '_blank');
+    productImage.addEventListener('touchmove', function(e) {
+        if (!isZoomed) return;
+        
+        e.preventDefault();
+        
+        if (isDragging && e.touches.length === 1) {
+            translateX = e.touches[0].clientX - startX;
+            translateY = e.touches[0].clientY - startY;
+            
+            // Limit panning to image boundaries
+            const maxX = (img.clientWidth * 1.8 - productImage.clientWidth) / 2;
+            const maxY = (img.clientHeight * 1.8 - productImage.clientHeight) / 2;
+            
+            translateX = Math.max(-maxX, Math.min(maxX, translateX));
+            translateY = Math.max(-maxY, Math.min(maxY, translateY));
+            
+            img.style.transform = `scale(1.8) translate(${translateX}px, ${translateY}px)`;
+        }
+    });
     
-//     // Optional: Clear cart after sending
-//     // cart = [];
-//     // updateCart();
-// }
+    productImage.addEventListener('touchend', function() {
+        isDragging = false;
+    });
+    
+    // Close zoom when clicking outside
+    document.addEventListener('click', function(e) {
+        if (isZoomed && !productImage.contains(e.target)) {
+            resetZoom();
+        }
+    });
+    
+    // Handle escape key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && isZoomed) {
+            resetZoom();
+        }
+    });
+    
+    function resetZoom() {
+        productImage.classList.remove('zoomed');
+        isZoomed = false;
+        img.style.transform = '';
+        translateX = 0;
+        translateY = 0;
+        document.body.style.overflow = '';
+    }
+}
 
 // ===============================
 // Event listeners & page setup
@@ -220,4 +260,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     updateCartCount();
+    
+    // Initialize mobile zoom on product pages
+    initializeMobileZoom();
 });
