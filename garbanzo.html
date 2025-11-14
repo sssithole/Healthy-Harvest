@@ -12,6 +12,37 @@
             object-fit: contain;
             border-radius: 8px;
         }
+
+         .benefits-section {
+            margin: 2rem 0;
+        }
+        
+        .benefits-title {
+            font-size: 1.3rem;
+            color: #2e8b57;
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+        
+        .benefits-list {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .benefit-item {
+            padding: 0.5rem 0;
+            color: #555;
+            font-size: 1rem;
+        }
+        
+        .benefit-item:before {
+            content: "•";
+            color: #2e8b57;
+            font-weight: bold;
+            display: inline-block;
+            width: 1em;
+            margin-left: -1em;
+        }
     </style>
 </head>
 <body data-product-id="garbanzo">
@@ -34,6 +65,15 @@
                 <h1 class="product-title" id="productTitle">Organic Garbanzo Beans (Chickpeas)</h1>
                 <div class="product-price" id="productPrice">R190.00</div>
                 <p class="product-description" id="productDescription">High-quality organic garbanzo beans, also known as chickpeas. Packed with plant-based protein, fiber, and essential nutrients. Great for making hummus, salads, stews, or roasted snacks. These versatile legumes support heart health and blood sugar regulation.</p>
+                 <div class="benefits-section">
+                    <h3 class="benefits-title">Health Benefits:</h3>
+                    <ul class="benefits-list">
+                        <li class="benefit-item">High in fiber</li>
+                        <li class="benefit-item">Support Blood Sugar regulation</li>
+                        <li class="benefit-item">Source of iron</li>
+                        <li class="benefit-item">Aids Diabetes Management</li>
+                    </ul>
+                </div>
                 <button class="add-to-cart" id="addToCart">Add to Cart</button>
             </div>
         </div>
