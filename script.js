@@ -1,44 +1,8 @@
 // ===============================
-// Product data
+// script.js — Cart logic & page setup
+// Products are sourced from products.js (getProducts / getProductById).
+// This file must be loaded AFTER products.js on every page.
 // ===============================
-const products = {
-  seamoss100: {
-        title: "Organic Sea Moss (100g)",
-        price: 125,
-        description: "Premium dried organic sea moss (Irish moss) in 100g package. This superfood is rich in 92 of the 102 minerals our bodies need. Great for making gels, adding to smoothies, or as a natural thickener. Supports thyroid function, digestion, and skin health.",
-        image: "./image/sea moss.png"
-    },
-    seamoss200: {
-        title: "Organic Sea Moss (200g)",
-        price: 225,
-        description: "Double the amount of our popular sea moss at a better value. Perfect for regular users.",
-        image: "./image/sea moss.png"
-    },
-    quinoa: {
-        title: "Organic Quinoa (2kg)",
-        price: 190,
-        description: "Premium quality organic quinoa, packed with protein and essential amino acids. Perfect for healthy meals.",
-        image: "./image/quinoa.png"
-    },
-    spelt: {
-        title: "Organic Spelt Grain/Flour (2kg)",
-        price: 190,
-        description: "Ancient grain spelt available as whole grain or flour. Nutrient-dense and easy to digest.",
-        image: "./image/remove.photos-removed-background.png"
-    },
-    garbanzo: {
-        title: "Organic Garbanzo Beans (2kg)",
-        price: 190,
-        description: "High-quality organic garbanzo beans (chickpeas), perfect for hummus, salads, and stews.",
-        image: "./image/pishon.png"
-    },
-    teabags: {
-        title: "Organic Herbal Tea Bags (20 pack)",
-        price: 85,
-        description: "Natural herbal tea bags for daily relaxation and wellness.",
-        image: "./image/TeaBags.png"
-    }
-};
 
 // ===============================
 // Safe cart initialization
@@ -52,35 +16,49 @@ try {
 }
 
 // ===============================
-// Load product info into page
+// Load product info into a product detail page
+// Reads data from the centralized product store via getProductById().
 // ===============================
 function loadProduct(productId) {
-    const productTitle = document.getElementById('productTitle');
-    const productPrice = document.getElementById('productPrice');
-    const productDescription = document.getElementById('productDescription');
-    const productImage = document.getElementById('productImage');
-
-    const currentProduct = products[productId];
-    if (!currentProduct) return;
-
-    productTitle.textContent = currentProduct.title;
-    productPrice.textContent = `R${currentProduct.price.toFixed(2)}`;
-    productDescription.textContent = currentProduct.description;
-
-    if (currentProduct.image.startsWith('./') || currentProduct.image.startsWith('http')) {
-        productImage.src = currentProduct.image;
-        productImage.alt = currentProduct.title;
-    } else {
-        productImage.alt = currentProduct.image;
+    const product = getProductById(productId);
+    if (!product) {
+        // Product not found — redirect home
+        console.warn('loadProduct: unknown product id:', productId);
+        return;
     }
+
+    const titleEl       = document.getElementById('productTitle');
+    const priceEl       = document.getElementById('productPrice');
+    const descEl        = document.getElementById('productDescription');
+    const imageEl       = document.getElementById('productImage');
+    const benefitsList  = document.getElementById('benefitsList');
+
+    if (titleEl)  titleEl.textContent  = product.title;
+    if (priceEl)  priceEl.textContent  = `R${Number(product.price).toFixed(2)}`;
+    if (descEl)   descEl.textContent   = product.description;
+
+    if (imageEl) {
+        imageEl.src = product.image;
+        imageEl.alt = product.title;
+    }
+
+    // Render benefits list if the element exists
+    if (benefitsList && Array.isArray(product.benefits) && product.benefits.length) {
+        benefitsList.innerHTML = product.benefits
+            .map(b => `<li class="benefit-item">${b}</li>`)
+            .join('');
+    }
+
+    // Update page title
+    document.title = `${product.title} — Blossom-Hai`;
 }
 
 // ===============================
 // Add product to cart
 // ===============================
 function addToCart(productId) {
-    const currentProduct = products[productId];
-    if (!currentProduct) return;
+    const product = getProductById(productId);
+    if (!product) return;
 
     const existingItem = cart.find(item => item.id === productId);
     if (existingItem) {
@@ -88,8 +66,8 @@ function addToCart(productId) {
     } else {
         cart.push({
             id: productId,
-            title: currentProduct.title,
-            price: currentProduct.price,
+            title: product.title,
+            price: product.price,
             quantity: 1
         });
     }
@@ -98,44 +76,46 @@ function addToCart(productId) {
 
     const addToCartBtn = document.getElementById('addToCart');
     if (addToCartBtn) {
-        addToCartBtn.textContent = 'Added to Cart!';
-        setTimeout(() => addToCartBtn.textContent = 'Add to Cart', 1500);
+        const original = addToCartBtn.textContent;
+        addToCartBtn.textContent = 'Added to Cart ✓';
+        addToCartBtn.disabled = true;
+        setTimeout(() => {
+            addToCartBtn.textContent = original;
+            addToCartBtn.disabled = false;
+        }, 1500);
     }
 }
 
 // ===============================
-// Remove item from cart
+// Remove item from cart (decrements quantity, removes at 0)
 // ===============================
 function removeFromCart(productId) {
     const itemIndex = cart.findIndex(item => item.id === productId);
     if (itemIndex === -1) return;
-    
+
     if (cart[itemIndex].quantity > 1) {
-        // If more than 1 quantity, just decrease by 1
         cart[itemIndex].quantity -= 1;
     } else {
-        // If only 1 quantity, remove the item completely
         cart.splice(itemIndex, 1);
     }
-    
+
     updateCart();
 }
 
 // ===============================
-// Update cart in storage and UI
+// Persist cart and refresh any live UI
 // ===============================
 function updateCart() {
     localStorage.setItem('cart', JSON.stringify(cart));
     updateCartCount();
-    
-    // Refresh cart display if on cart page
+
     if (window.location.pathname.includes('cart.html')) {
         renderCartPage();
     }
 }
 
 // ===============================
-// Update cart count badge
+// Update the cart badge count in the navbar
 // ===============================
 function updateCartCount() {
     const cartCount = document.getElementById('cartCount');
@@ -145,84 +125,159 @@ function updateCartCount() {
 }
 
 // ===============================
-// Mobile Zoom Functionality
+// Render the full cart page
+// ===============================
+function renderCartPage() {
+    const cartItemsContainer = document.getElementById('cartItemsContainer');
+    const cartSummary        = document.getElementById('cartSummary');
+    const checkoutBtn        = document.getElementById('checkoutBtn');
+
+    if (!cartItemsContainer) return;
+
+    if (cart.length === 0) {
+        cartItemsContainer.innerHTML = `
+            <div class="empty-cart">
+                <p>Your cart is empty</p>
+                <a href="index.html" class="continue-shopping">Continue Shopping</a>
+            </div>`;
+        if (cartSummary) cartSummary.innerHTML = '';
+        if (checkoutBtn) checkoutBtn.style.display = 'none';
+        return;
+    }
+
+    let itemsHTML = '';
+    let subtotal  = 0;
+
+    cart.forEach(item => {
+        const itemTotal = item.quantity * item.price;
+        subtotal += itemTotal;
+
+        itemsHTML += `
+            <div class="cart-item" data-product-id="${item.id}">
+                <div class="item-info">
+                    <h3>${item.title}</h3>
+                    <div class="quantity-controls">
+                        <button class="quantity-btn minus" data-action="remove">−</button>
+                        <span class="quantity">${item.quantity}</span>
+                        <button class="quantity-btn plus" data-action="add">+</button>
+                    </div>
+                    <p>R${Number(item.price).toFixed(2)} each</p>
+                </div>
+                <div class="item-actions">
+                    <div class="item-total">R${itemTotal.toFixed(2)}</div>
+                    <button class="remove-btn">Remove</button>
+                </div>
+            </div>`;
+    });
+
+    const shipping = 100;
+    const total    = subtotal + shipping;
+
+    cartItemsContainer.innerHTML = itemsHTML;
+
+    // Quantity +/- buttons
+    document.querySelectorAll('.quantity-btn').forEach(btn => {
+        btn.addEventListener('click', function () {
+            const productId = this.closest('.cart-item').dataset.productId;
+            if (this.dataset.action === 'add') {
+                addToCart(productId);
+            } else {
+                removeFromCart(productId);
+            }
+        });
+    });
+
+    // Remove buttons
+    document.querySelectorAll('.remove-btn').forEach(btn => {
+        btn.addEventListener('click', function () {
+            const productId = this.closest('.cart-item').dataset.productId;
+            const idx = cart.findIndex(item => item.id === productId);
+            if (idx !== -1) {
+                cart.splice(idx, 1);
+                updateCart();
+            }
+        });
+    });
+
+    if (cartSummary) {
+        cartSummary.innerHTML = `
+            <div class="summary-row">
+                <span>Subtotal</span>
+                <span>R${subtotal.toFixed(2)}</span>
+            </div>
+            <div class="summary-row">
+                <span>Shipping</span>
+                <span>R${shipping.toFixed(2)}</span>
+            </div>
+            <div class="summary-row total-row">
+                <span>Total</span>
+                <span>R${total.toFixed(2)}</span>
+            </div>`;
+    }
+
+    if (checkoutBtn) checkoutBtn.style.display = 'block';
+}
+
+// ===============================
+// Mobile zoom & pan on product image
 // ===============================
 function initializeMobileZoom() {
-    const productImage = document.querySelector('.product-image');
-    if (!productImage) return;
-    
-    const img = productImage.querySelector('img');
+    const productImageWrap = document.querySelector('.product-image');
+    if (!productImageWrap) return;
+
+    const img = productImageWrap.querySelector('img');
     if (!img) return;
-    
-    let isZoomed = false;
+
+    let isZoomed   = false;
     let isDragging = false;
     let startX, startY, translateX = 0, translateY = 0;
-    
-    // Click to zoom (mobile friendly)
-    productImage.addEventListener('click', function(e) {
-        if (window.innerWidth <= 768) { // Mobile only
-            if (!isZoomed) {
-                // Zoom in
-                productImage.classList.add('zoomed');
-                isZoomed = true;
-                img.style.transform = 'scale(1.8)';
-                document.body.style.overflow = 'hidden';
-            } else {
-                // Zoom out
-                resetZoom();
-            }
+
+    productImageWrap.addEventListener('click', function (e) {
+        if (window.innerWidth > 768) return;
+        if (!isZoomed) {
+            productImageWrap.classList.add('zoomed');
+            isZoomed = true;
+            img.style.transform = 'scale(1.8)';
+            document.body.style.overflow = 'hidden';
+        } else {
+            resetZoom();
         }
     });
-    
-    // Touch events for panning
-    productImage.addEventListener('touchstart', function(e) {
+
+    productImageWrap.addEventListener('touchstart', function (e) {
         if (isZoomed && e.touches.length === 1) {
             isDragging = true;
             startX = e.touches[0].clientX - translateX;
             startY = e.touches[0].clientY - translateY;
         }
     });
-    
-    productImage.addEventListener('touchmove', function(e) {
+
+    productImageWrap.addEventListener('touchmove', function (e) {
         if (!isZoomed) return;
-        
         e.preventDefault();
-        
         if (isDragging && e.touches.length === 1) {
             translateX = e.touches[0].clientX - startX;
             translateY = e.touches[0].clientY - startY;
-            
-            // Limit panning to image boundaries
-            const maxX = (img.clientWidth * 1.8 - productImage.clientWidth) / 2;
-            const maxY = (img.clientHeight * 1.8 - productImage.clientHeight) / 2;
-            
+            const maxX = (img.clientWidth * 1.8 - productImageWrap.clientWidth) / 2;
+            const maxY = (img.clientHeight * 1.8 - productImageWrap.clientHeight) / 2;
             translateX = Math.max(-maxX, Math.min(maxX, translateX));
             translateY = Math.max(-maxY, Math.min(maxY, translateY));
-            
-            img.style.transform = `scale(1.8) translate(${translateX}px, ${translateY}px)`;
+            img.style.transform = `scale(1.8) translate(${translateX / 1.8}px, ${translateY / 1.8}px)`;
         }
+    }, { passive: false });
+
+    productImageWrap.addEventListener('touchend', () => { isDragging = false; });
+
+    document.addEventListener('click', function (e) {
+        if (isZoomed && !productImageWrap.contains(e.target)) resetZoom();
     });
-    
-    productImage.addEventListener('touchend', function() {
-        isDragging = false;
+
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && isZoomed) resetZoom();
     });
-    
-    // Close zoom when clicking outside
-    document.addEventListener('click', function(e) {
-        if (isZoomed && !productImage.contains(e.target)) {
-            resetZoom();
-        }
-    });
-    
-    // Handle escape key
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape' && isZoomed) {
-            resetZoom();
-        }
-    });
-    
+
     function resetZoom() {
-        productImage.classList.remove('zoomed');
+        productImageWrap.classList.remove('zoomed');
         isZoomed = false;
         img.style.transform = '';
         translateX = 0;
@@ -232,9 +287,10 @@ function initializeMobileZoom() {
 }
 
 // ===============================
-// Event listeners & page setup
+// DOMContentLoaded — wire up common page elements
 // ===============================
 document.addEventListener('DOMContentLoaded', () => {
+    // Cart icon → navigate to cart
     const cartIcon = document.getElementById('cartIcon');
     if (cartIcon) {
         cartIcon.addEventListener('click', () => {
@@ -242,25 +298,30 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // Product detail page setup
     const addToCartBtn = document.getElementById('addToCart');
     if (addToCartBtn) {
-        // Get product ID from the page (either data attribute or fallback)
+        // Prefer data-product-id on <body>, fallback to ?id= query param
         let productId = document.body.getAttribute('data-product-id');
         if (!productId) {
-            // fallback: use URL param like ?id=spelt
             const urlParams = new URLSearchParams(window.location.search);
-            productId = urlParams.get('id') || 'spelt'; // default to spelt
+            productId = urlParams.get('id');
         }
 
-        loadProduct(productId);
-
-        addToCartBtn.addEventListener('click', () => {
-            addToCart(productId);
-        });
+        if (productId) {
+            loadProduct(productId);
+            addToCartBtn.addEventListener('click', () => addToCart(productId));
+        }
     }
 
+    // Cart page
+    if (window.location.pathname.includes('cart.html')) {
+        renderCartPage();
+    }
+
+    // Always refresh the badge
     updateCartCount();
-    
-    // Initialize mobile zoom on product pages
+
+    // Mobile zoom on product pages
     initializeMobileZoom();
 });

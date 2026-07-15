@@ -1,0 +1,32 @@
+# =============================================================
+# .gitignore — Blossom-Hai / Healthy-Harvest
+# =============================================================
+
+# ── Admin credentials ── NEVER commit this ────────────────────
+config.php
+
+# ── macOS system files ────────────────────────────────────────
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+
+# ── Uploaded product images ───────────────────────────────────
+# Images uploaded via the admin panel are stored in /image.
+# Comment out these lines if you DO want to track them in git.
+# image/*.jpg
+# image/*.jpeg
+# image/*.png
+# image/*.webp
+# image/*.gif
+
+# ── Editor / IDE ──────────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# ── PHP logs ──────────────────────────────────────────────────
+*.log
+error_log

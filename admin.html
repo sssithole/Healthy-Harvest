@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin — Blossom-Hai</title>
+    <link rel="stylesheet" href="./styles.css">
+</head>
+<body class="admin-body">
+
+<!-- ── Login Gate ─────────────────────────────────────────── -->
+<div class="admin-login" id="loginScreen">
+    <div class="login-card">
+        <div class="login-logo">🌿</div>
+        <h1>Blossom-Hai Admin</h1>
+        <p>Enter your password to continue</p>
+        <form id="loginForm" novalidate>
+            <input type="password" id="adminPassword" placeholder="Admin password"
+                   class="admin-input" autocomplete="current-password" required>
+            <div class="login-error" id="loginError" style="display:none;">
+                Incorrect password. Please try again.
+            </div>
+            <button type="submit" class="admin-btn primary full-width" id="loginBtn">Login</button>
+        </form>
+    </div>
+</div>
+
+<!-- ── Admin Dashboard (hidden until login) ───────────────── -->
+<div class="admin-dashboard" id="adminDashboard" style="display:none;">
+
+    <nav class="admin-nav">
+        <a href="./index.html" class="logo">Blossom-Hai</a>
+        <div class="admin-nav-right">
+            <span class="admin-badge">Admin Panel</span>
+            <button class="admin-btn small danger" id="logoutBtn">Logout</button>
+        </div>
+    </nav>
+
+    <div class="admin-layout">
+
+        <!-- ── Sidebar: Add / Edit form ───────────────────── -->
+        <aside class="admin-sidebar">
+            <div class="admin-card">
+                <h2 class="admin-section-title" id="formTitle">Add New Product</h2>
+
+                <div class="image-preview-wrap">
+                    <img id="imagePreview" src="" alt="" style="display:none;">
+                    <div class="image-placeholder" id="imagePlaceholder">🖼️<br>No image selected</div>
+                </div>
+
+                <!-- Upload progress bar -->
+                <div class="upload-progress" id="uploadProgress" style="display:none;">
+                    <div class="upload-progress-bar" id="uploadProgressBar"></div>
+                    <span id="uploadProgressLabel">Uploading…</span>
+                </div>
+
+                <form id="productForm" novalidate>
+                    <input type="hidden" id="editingId">
+
+                    <label class="admin-label">Product Name *</label>
+                    <input type="text" id="pTitle" class="admin-input"
+                           placeholder="e.g. Organic Quinoa (2kg)" required>
+
+                    <label class="admin-label">Price (R) *</label>
+                    <input type="number" id="pPrice" class="admin-input"
+                           placeholder="e.g. 190" min="0" step="0.01" required>
+
+                    <label class="admin-label">Description *</label>
+                    <textarea id="pDescription" class="admin-input admin-textarea"
+                              placeholder="Brief product description…" rows="4" required></textarea>
+
+                    <label class="admin-label">Product Image</label>
+                    <div class="upload-area" id="uploadArea">
+                        <input type="file" id="pImageFile" accept="image/jpeg,image/png,image/webp,image/gif"
+                               style="display:none;">
+                        <div class="upload-inner" id="uploadTrigger">
+                            <span class="upload-icon">📁</span>
+                            <span>Click to upload image</span>
+                            <span class="upload-hint">JPG, PNG, WEBP, GIF — max 5 MB — saved to /image folder</span>
+                        </div>
+                    </div>
+                    <input type="text" id="pImageUrl" class="admin-input"
+                           placeholder="Or paste an existing path (e.g. ./image/quinoa.png)"
+                           style="margin-top:0.5rem;">
+
+                    <label class="admin-label">Health Benefits
+                        <span class="label-hint">(one per line)</span>
+                    </label>
+                    <textarea id="pBenefits" class="admin-input admin-textarea"
+                              placeholder="High in Fiber&#10;Complete Protein&#10;Gluten-Free" rows="4"></textarea>
+
+                    <div class="form-actions">
+                        <button type="submit" class="admin-btn primary" id="saveBtn">Save Product</button>
+                        <button type="button" class="admin-btn secondary" id="cancelEditBtn"
+                                style="display:none;">Cancel</button>
+                    </div>
+                    <div class="form-msg" id="formMsg" style="display:none;"></div>
+                </form>
+            </div>
+        </aside>
+
+        <!-- ── Main: Products list ────────────────────────── -->
+        <main class="admin-main">
+            <div class="admin-card">
+                <div class="admin-list-header">
+                    <h2 class="admin-section-title">
+                        All Products
+                        <span class="product-count" id="productCount">0</span>
+                    </h2>
+                    <div class="admin-list-actions">
+                        <input type="search" id="productSearch" class="admin-input small"
+                               placeholder="Search products…">
+                        <button class="admin-btn small secondary" id="resetBtn">Reset to Defaults</button>
+                    </div>
+                </div>
+
+                <div class="admin-product-grid" id="adminProductGrid"></div>
+
+                <div class="no-products-admin" id="noProductsAdmin" style="display:none;">
+                    <p>No products found. Add one using the form.</p>
+                </div>
+            </div>
+        </main>
+
+    </div>
+</div><!-- /#adminDashboard -->
+
+<!-- ── Delete confirmation modal ─────────────────────────── -->
+<div class="modal-overlay" id="deleteModal" style="display:none;" role="dialog" aria-modal="true">
+    <div class="modal-card">
+        <h3>Remove Product?</h3>
+        <p id="deleteModalMsg">This will permanently remove the product from your store.</p>
+        <div class="modal-actions">
+            <button class="admin-btn danger"    id="confirmDeleteBtn">Yes, Remove</button>
+            <button class="admin-btn secondary" id="cancelDeleteBtn">Cancel</button>
+        </div>
+    </div>
+</div>
+
+<script src="./products.js"></script>
+
+<script>
+// =============================================================
+// admin.js (inline)
+// Auth talks to upload.php — password never in this file.
+// Image upload POSTs multipart to upload.php — file saved server-side.
+// =============================================================
+
+const API = './upload.php';
+
+// ── Helpers ───────────────────────────────────────────────────
+async function api(action, options = {}) {
+    const url = `${API}?action=${action}`;
+    const res = await fetch(url, { credentials: 'same-origin', ...options });
+    return res.json();
+}
+
+function showLoginError(msg) {
+    const el = document.getElementById('loginError');
+    el.textContent    = msg || 'Incorrect password. Please try again.';
+    el.style.display  = 'block';
+}
+
+function hideLoginError() {
+    document.getElementById('loginError').style.display = 'none';
+}
+
+// ── Session check on page load ────────────────────────────────
+(async function init() {
+    const data = await api('check').catch(() => ({ authed: false }));
+    if (data.authed) showDashboard();
+})();
+
+// ── Login ─────────────────────────────────────────────────────
+document.getElementById('loginForm').addEventListener('submit', async function (e) {
+    e.preventDefault();
+    hideLoginError();
+
+    const btn      = document.getElementById('loginBtn');
+    const password = document.getElementById('adminPassword').value;
+    btn.textContent = 'Logging in…';
+    btn.disabled    = true;
+
+    const data = await api('login', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ password })
+    }).catch(() => ({ ok: false, error: 'Network error. Please try again.' }));
+
+    btn.textContent = 'Login';
+    btn.disabled    = false;
+
+    if (data.ok) {
+        document.getElementById('adminPassword').value = '';
+        showDashboard();
+    } else {
+        showLoginError(data.error);
+        document.getElementById('adminPassword').value = '';
+        document.getElementById('adminPassword').focus();
+    }
+});
+
+// ── Logout ────────────────────────────────────────────────────
+document.getElementById('logoutBtn').addEventListener('click', async function () {
+    await api('logout', { method: 'POST' }).catch(() => {});
+    location.reload();
+});
+
+// ── Show dashboard ────────────────────────────────────────────
+function showDashboard() {
+    document.getElementById('loginScreen').style.display    = 'none';
+    document.getElementById('adminDashboard').style.display = 'block';
+    renderAdminProducts();
+}
+</script>
+
+<script>
+// =============================================================
+// Image upload — posts to upload.php, gets back a server path
+// =============================================================
+
+let resolvedImagePath = ''; // the final ./image/filename.ext stored in product
+
+function showImagePreview(src) {
+    const img = document.getElementById('imagePreview');
+    const ph  = document.getElementById('imagePlaceholder');
+    img.src             = src;
+    img.style.display   = 'block';
+    ph.style.display    = 'none';
+}
+
+function clearImagePreview() {
+    const img = document.getElementById('imagePreview');
+    const ph  = document.getElementById('imagePlaceholder');
+    img.src             = '';
+    img.style.display   = 'none';
+    ph.style.display    = 'block';
+    resolvedImagePath   = '';
+    document.getElementById('pImageFile').value = '';
+    document.getElementById('pImageUrl').value  = '';
+}
+
+function setUploadProgress(pct, label) {
+    const wrap  = document.getElementById('uploadProgress');
+    const bar   = document.getElementById('uploadProgressBar');
+    const lbl   = document.getElementById('uploadProgressLabel');
+    wrap.style.display  = pct === null ? 'none' : 'block';
+    if (pct !== null) {
+        bar.style.width   = pct + '%';
+        lbl.textContent   = label || 'Uploading…';
+    }
+}
+
+// Click on the upload zone
+document.getElementById('uploadTrigger').addEventListener('click', function () {
+    document.getElementById('pImageFile').click();
+});
+
+// File chosen → POST to upload.php immediately
+document.getElementById('pImageFile').addEventListener('change', async function (e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    // Show local preview right away
+    const reader = new FileReader();
+    reader.onload = ev => showImagePreview(ev.target.result);
+    reader.readAsDataURL(file);
+
+    // Upload to server
+    setUploadProgress(0, 'Uploading…');
+
+    const formData = new FormData();
+    formData.append('image', file);
+
+    // Use XHR for progress tracking
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', `${API}?action=upload`);
+    xhr.withCredentials = true;
+
+    xhr.upload.addEventListener('progress', function (ev) {
+        if (ev.lengthComputable) {
+            const pct = Math.round((ev.loaded / ev.total) * 100);
+            setUploadProgress(pct, `Uploading… ${pct}%`);
+        }
+    });
+
+    xhr.addEventListener('load', function () {
+        setUploadProgress(null);
+        let data;
+        try { data = JSON.parse(xhr.responseText); } catch { data = { ok: false }; }
+
+        if (data.ok) {
+            resolvedImagePath = data.url;           // e.g. ./image/quinoa_abc123.png
+            document.getElementById('pImageUrl').value = data.url;
+            showFormMessage('Image uploaded to /image folder ✓', 'success');
+        } else {
+            clearImagePreview();
+            showFormMessage(data.error || 'Upload failed.', 'error');
+        }
+    });
+
+    xhr.addEventListener('error', function () {
+        setUploadProgress(null);
+        clearImagePreview();
+        showFormMessage('Network error during upload.', 'error');
+    });
+
+    xhr.send(formData);
+});
+
+// Manual URL / path input
+document.getElementById('pImageUrl').addEventListener('input', function () {
+    const val = this.value.trim();
+    if (val) {
+        resolvedImagePath = val;
+        showImagePreview(val);
+    } else {
+        resolvedImagePath = '';
+    }
+});
+</script>
+
+<script>
+// =============================================================
+// Product form — save to localStorage product store
+// =============================================================
+
+function generateId(title) {
+    return title.toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-|-$/g, '')
+        .substring(0, 40) + '-' + Date.now().toString(36);
+}
+
+function showFormMessage(msg, type) {
+    const el        = document.getElementById('formMsg');
+    el.textContent  = msg;
+    el.className    = 'form-msg form-msg--' + type;
+    el.style.display = 'block';
+    setTimeout(() => { el.style.display = 'none'; }, 4000);
+}
+
+function resetForm() {
+    document.getElementById('productForm').reset();
+    document.getElementById('editingId').value               = '';
+    document.getElementById('formTitle').textContent         = 'Add New Product';
+    document.getElementById('saveBtn').textContent           = 'Save Product';
+    document.getElementById('cancelEditBtn').style.display   = 'none';
+    clearImagePreview();
+}
+
+document.getElementById('cancelEditBtn').addEventListener('click', resetForm);
+
+document.getElementById('productForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+
+    const title       = document.getElementById('pTitle').value.trim();
+    const price       = parseFloat(document.getElementById('pPrice').value);
+    const description = document.getElementById('pDescription').value.trim();
+    const image       = resolvedImagePath || document.getElementById('pImageUrl').value.trim();
+    const benefitsRaw = document.getElementById('pBenefits').value.trim();
+    const benefits    = benefitsRaw
+        ? benefitsRaw.split('\n').map(b => b.trim()).filter(Boolean)
+        : [];
+    const editingId   = document.getElementById('editingId').value;
+
+    if (!title || isNaN(price) || price < 0 || !description) {
+        showFormMessage('Please fill in Name, Price and Description.', 'error');
+        return;
+    }
+
+    const id = editingId || generateId(title);
+    addProduct({ id, title, price, description, image, benefits, available: true });
+
+    showFormMessage(editingId ? 'Product updated!' : 'Product added!', 'success');
+    resetForm();
+    renderAdminProducts();
+});
+
+// =============================================================
+// Render product grid
+// =============================================================
+
+function renderAdminProducts(filter) {
+    const grid    = document.getElementById('adminProductGrid');
+    const noEl    = document.getElementById('noProductsAdmin');
+    const countEl = document.getElementById('productCount');
+
+    let products = getProducts();
+    countEl.textContent = products.length;
+
+    if (filter) {
+        const q = filter.toLowerCase();
+        products = products.filter(p =>
+            p.title.toLowerCase().includes(q) ||
+            p.description.toLowerCase().includes(q)
+        );
+    }
+
+    if (products.length === 0) {
+        grid.innerHTML     = '';
+        grid.style.display = 'none';
+        noEl.style.display = 'block';
+        return;
+    }
+
+    grid.style.display = '';
+    noEl.style.display = 'none';
+
+    grid.innerHTML = products.map(p => `
+        <div class="admin-product-card ${p.available === false ? 'unavailable' : ''}" data-id="${p.id}">
+            <div class="admin-product-img">
+                <img src="${p.image}" alt="${p.title}"
+                     onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+                <div class="admin-img-fallback" style="display:none;">🌿</div>
+            </div>
+            <div class="admin-product-info">
+                <h3>${p.title}</h3>
+                <span class="admin-price">R${Number(p.price).toFixed(2)}</span>
+                <span class="status-badge ${p.available !== false ? 'badge-active' : 'badge-inactive'}">
+                    ${p.available !== false ? 'Active' : 'Hidden'}
+                </span>
+                <p class="admin-desc">
+                    ${p.description.substring(0, 100)}${p.description.length > 100 ? '…' : ''}
+                </p>
+            </div>
+            <div class="admin-product-actions">
+                <button class="admin-btn small primary   edit-btn"   data-id="${p.id}">Edit</button>
+                <button class="admin-btn small secondary toggle-btn" data-id="${p.id}">
+                    ${p.available !== false ? 'Hide' : 'Show'}
+                </button>
+                <button class="admin-btn small danger    delete-btn" data-id="${p.id}">Remove</button>
+            </div>
+        </div>
+    `).join('');
+
+    grid.querySelectorAll('.edit-btn').forEach(btn =>
+        btn.addEventListener('click', () => startEdit(btn.dataset.id))
+    );
+
+    grid.querySelectorAll('.toggle-btn').forEach(btn =>
+        btn.addEventListener('click', () => {
+            const all = getProducts();
+            const idx = all.findIndex(x => x.id === btn.dataset.id);
+            if (idx >= 0) {
+                all[idx].available = !all[idx].available;
+                saveProducts(all);
+            }
+            renderAdminProducts(document.getElementById('productSearch').value.trim());
+        })
+    );
+
+    grid.querySelectorAll('.delete-btn').forEach(btn =>
+        btn.addEventListener('click', () => openDeleteModal(btn.dataset.id))
+    );
+}
+
+// =============================================================
+// Edit
+// =============================================================
+
+function startEdit(productId) {
+    const p = getProductById(productId);
+    if (!p) return;
+
+    document.getElementById('editingId').value              = p.id;
+    document.getElementById('pTitle').value                 = p.title;
+    document.getElementById('pPrice').value                 = p.price;
+    document.getElementById('pDescription').value           = p.description;
+    document.getElementById('pBenefits').value              = (p.benefits || []).join('\n');
+    document.getElementById('formTitle').textContent        = 'Edit Product';
+    document.getElementById('saveBtn').textContent          = 'Update Product';
+    document.getElementById('cancelEditBtn').style.display  = 'inline-flex';
+
+    if (p.image) {
+        resolvedImagePath = p.image;
+        document.getElementById('pImageUrl').value = p.image;
+        showImagePreview(p.image);
+    } else {
+        clearImagePreview();
+    }
+
+    document.getElementById('pTitle').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// =============================================================
+// Delete modal
+// =============================================================
+
+let pendingDeleteId = null;
+
+function openDeleteModal(productId) {
+    const p = getProductById(productId);
+    if (!p) return;
+    pendingDeleteId = productId;
+    document.getElementById('deleteModalMsg').textContent =
+        `Remove "${p.title}" from your store? This cannot be undone.`;
+    document.getElementById('deleteModal').style.display = 'flex';
+}
+
+document.getElementById('confirmDeleteBtn').addEventListener('click', function () {
+    if (pendingDeleteId) {
+        removeProduct(pendingDeleteId, true);
+        pendingDeleteId = null;
+        document.getElementById('deleteModal').style.display = 'none';
+        renderAdminProducts(document.getElementById('productSearch').value.trim());
+    }
+});
+
+document.getElementById('cancelDeleteBtn').addEventListener('click', function () {
+    pendingDeleteId = null;
+    document.getElementById('deleteModal').style.display = 'none';
+});
+
+document.getElementById('deleteModal').addEventListener('click', function (e) {
+    if (e.target === this) {
+        pendingDeleteId = null;
+        this.style.display = 'none';
+    }
+});
+
+// =============================================================
+// Search & Reset
+// =============================================================
+
+document.getElementById('productSearch').addEventListener('input', function () {
+    renderAdminProducts(this.value.trim());
+});
+
+document.getElementById('resetBtn').addEventListener('click', function () {
+    if (confirm('Reset all products to the original defaults? Any custom products will be lost.')) {
+        resetProducts();
+        renderAdminProducts();
+        showFormMessage('Products reset to defaults.', 'success');
+    }
+});
+</script>
+</body>
+</html>

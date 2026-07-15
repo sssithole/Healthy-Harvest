@@ -1,0 +1,47 @@
+# =============================================================
+# .htaccess — Blossom-Hai / Healthy-Harvest
+# =============================================================
+
+# ── Block direct browser access to sensitive PHP files ────────
+# config.php must never be readable via a URL.
+<Files "config.php">
+    Order allow,deny
+    Deny from all
+</Files>
+
+# ── Prevent directory listing ─────────────────────────────────
+Options -Indexes
+
+# ── Security headers ──────────────────────────────────────────
+<IfModule mod_headers.c>
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set X-Frame-Options "SAMEORIGIN"
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+</IfModule>
+
+# ── Protect the image upload folder from PHP execution ────────
+# Uploaded files are images only — prevent any uploaded .php being run.
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Block PHP execution inside /image/
+    RewriteRule ^image/.*\.php$ - [F,L]
+</IfModule>
+
+# ── Cache static assets ───────────────────────────────────────
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresByType image/jpeg  "access plus 1 month"
+    ExpiresByType image/png   "access plus 1 month"
+    ExpiresByType image/webp  "access plus 1 month"
+    ExpiresByType image/gif   "access plus 1 month"
+    ExpiresByType text/css    "access plus 1 week"
+    ExpiresByType text/javascript "access plus 1 week"
+</IfModule>
+
+# ── PHP session hardening (cPanel shared hosting) ─────────────
+<IfModule mod_php.c>
+    php_flag session.cookie_httponly On
+    php_flag session.use_strict_mode On
+    php_value session.gc_maxlifetime 7200
+</IfModule>
